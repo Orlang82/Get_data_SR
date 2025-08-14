@@ -1,6 +1,7 @@
 # Папки
 .pyproject/
 .vscode/
+.spyproject/
 .
 
 # Python файлы
