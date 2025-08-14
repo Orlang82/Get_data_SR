@@ -1,4 +1,3 @@
-
 # 📊 Система автоматизированной выгрузки данных и отчетности из SR-bank
 
 ⛏ **Назначение проекта**
@@ -30,19 +29,23 @@ Get_data_SR/
 │   └── secur_doc.py         # Ценные бумаги — сделки
 │
 ├── sql/                     # SQL-шаблоны для запросов
-│   ├── SR_6JX_FZ_CCF_template.sql
-│   ├── SR_BALANCE_NRK_template.sql
-│   ├── SR_CHECK_9000_template.sql
-│   ├── SR_CHECK_DZ_SPOT_template.sql
-│   ├── SR_DIFF_ACC_template.sql
-│   ├── SR_DIFF_DZ_SPOT_template.sql
-│   ├── SR_DOC_ACC_template.sql
-│   └── SR_SECUR_DOC_template.sql
+│   ├── SR_6JX_FZ_CCF_template.sql      # Выгрузка данных фин.обязат. (9 кл.) с CCF для 6JX
+│   ├── SR_BALANCE_NRK_template.sql     # Выгрузка данных баланса для Нрк
+│   ├── SR_CHECK_9000_template.sql      # Выгрузка данных 900% и 9129 для Нрк
+│   ├── SR_CHECK_DZ_SPOT_template.sql   # Выгрузка данных по ДЗ и СПОТ
+│   ├── SR_DIFF_ACC_template.sql        # Выгрузка данных по динамика остатков по счетам
+│   ├── SR_DIFF_DZ_SPOT_template.sql    # Выгрузка данных по ДЗ и СПОТ
+│   ├── SR_DOC_ACC_template.sql         # Выгрузка данных по документам заданного счета
+│   └── SR_SECUR_DOC_template.sql       # Выгрузка данных по сделкам ЦБ
 │
 ├── utils/                   # Вспомогательные модули
-   ├── date_utils.py        # Работа с датами
-   ├── excel_writer.py      # Экспорт в Excel
-   └── path_utils.py        # Пути и директории
+│   ├── date_utils.py        # Работа с датами
+│   ├── excel_writer.py      # Экспорт в Excel
+│   └── path_utils.py        # Пути и директории
+│
+├── watcher/                 # Модули для мониторинга файлов STAT на сетевых дисках
+│   ├── check_copy_v1.py     # Базовая версия мониторинга
+│   └── check_copy_v2.py     # Расширенная версия мониторинга
 ```
 
 ---
@@ -231,16 +234,3 @@ run_balance_nrk()
 - **Формат отчетов:** Excel (.xlsx)
 - **Интеграция:** xlwings 0.33.15
 ---
-
-## 📌 Возможные улучшения
-
-1. Добавить логирование (`logging`)
-2. Параметризацию SQL-шаблонов через Jinja2
-3. Асинхронную обработку (asyncio) для ускорения
-4. Докеризацию проекта
-
----
-
-## 📜 Лицензия
-*(указать при необходимости)*
-
