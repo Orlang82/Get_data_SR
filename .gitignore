@@ -2,6 +2,7 @@
 .pyproject/
 .vscode/
 .spyproject/
+mail/
 .
 
 # Python файлы
