@@ -15,7 +15,12 @@ def fetch_to_diff_acc():
     # Приводим даты к строкам (DD.MM.YYYY)
     date_param_old_str = date_param_old.strftime("%d.%m.%Y")
     date_param_str = date_param.strftime("%d.%m.%Y")
-    date_r020_str = str(int(date_r020))
+    # Обработка date_r020 в зависимости от типа
+    if isinstance(date_r020, str):
+        date_r020_str = date_r020
+    else:
+        # Если это число (включая float), приводим к int, затем к строке
+        date_r020_str = str(int(date_r020))
 
     sql_path = get_sql_path("SR_DIFF_ACC_template.sql")
     with open(sql_path, encoding="utf-8") as f:

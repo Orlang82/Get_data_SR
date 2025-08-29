@@ -32,8 +32,8 @@ BASE_DATA AS (
         
 	/*Счета по R020*/
     AND SUBSTR(A.ACCOUNT_NUMBER, 1, 4) IN (:date_r020)
---    AND SUBSTR(A.ACCOUNT_NUMBER, 1, 4) LIKE '32%'
-    
+    -- AND A.ACCOUNT_NUMBER LIKE ':date_r020'
+
     /*Счет по номеру*/
 --    AND A.ACCOUNT_NUMBER IN (18116100000033)
     

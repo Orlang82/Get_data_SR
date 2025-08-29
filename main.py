@@ -7,7 +7,7 @@ from mail.forecast_nrk import generate_forecast_email
 from fetchers.diff_acc import paste_to_excel_diff_acc
 from fetchers.fz_ccf_6jx import paste_to_excel_fz_ccf_6jx
 from fetchers.doc_acc import paste_to_excel_doc_acc
-from charts.test_ES import paste_plot_var_es
+from charts.chart_es import paste_plot_var_es
 from fetchers.compens_579 import paste_to_excel_comp_579
 
 # Основные вызовы (вызываются из Excel через xlwings)
