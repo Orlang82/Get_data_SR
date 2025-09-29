@@ -12,6 +12,7 @@ from fetchers.compens_579 import paste_to_excel_comp_579
 from fetchers.detail_6jx import paste_to_excel_6jx_reserve
 from fetchers.banks_42x import paste_to_excel_banks_42x
 from fetchers.rc_component import paste_to_excel_rc_comp
+from charts.chart_as import insert_image_to_excel
 
 # Основные вызовы (вызываются из Excel через xlwings)
 def run_secur_doc():
@@ -69,3 +70,6 @@ def run_42x_banks():
 def run_rc_comp():
     """Запускает вставку данных для компонентов РК в Excel."""
     paste_to_excel_rc_comp()
+
+def run_plot_as():
+    insert_image_to_excel()
