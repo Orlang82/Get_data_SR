@@ -3,6 +3,7 @@ from utils.date_utils import get_previous_working_day
 from pandas.tseries.offsets import BDay
 from utils.excel_writer import paste_to_excel
 from utils.path_utils import get_sql_path
+from utils.date_utils import forecast_date
 
 def fetch_to_diff_spot():
 
@@ -10,8 +11,13 @@ def fetch_to_diff_spot():
     with open(sql_path, encoding="utf-8") as f:
         sql = f.read().strip().rstrip(";")
 
-    date_param_old = get_previous_working_day() - BDay(1)
-    date_param = get_previous_working_day()
+    # Определяем даты параметров в зависимости от режима прогноза
+    if not forecast_date():
+        date_param_old = get_previous_working_day() - BDay(1)
+        date_param = get_previous_working_day()
+    else:
+        date_param_old = forecast_date() - BDay(1)
+        date_param = forecast_date()
 
     # Форматируем даты как строки в формате 'DD.MM.YYYY'
     date_param_old_str = date_param_old.strftime("%d.%m.%Y")

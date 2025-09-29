@@ -4,22 +4,20 @@ from utils.excel_writer import paste_to_excel
 from utils.path_utils import get_sql_path
 from utils.date_utils import forecast_date
 
-def fetch_to_9000grp():
+def fetch_to_rc_comp():
     # Путь к текущему файлу
-    sql_path = get_sql_path("SR_CHECK_9000_template.sql")
+    sql_path = get_sql_path("SR_RC_component_template.sql")
     with open(sql_path, encoding="utf-8") as f:
         sql = f.read().strip().rstrip(";")
     
     # Определяем даты параметров в зависимости от режима прогноза
     if not forecast_date():
-        date_param = get_previous_working_day()
-        ccf_param = 1
+        date_param = get_previous_working_day()    
     else:
         date_param = forecast_date()
-        ccf_param = 0.2
     
-    return query(sql, {"date_param": date_param, "ccf_param": ccf_param})
+    return query(sql, {"date_param": date_param})
 
-def paste_to_excel_9000grp():
-    df = fetch_to_9000grp()
-    paste_to_excel("Нрк_TEST", "tSUM9000", df)
+def paste_to_excel_rc_comp():
+    df = fetch_to_rc_comp()
+    paste_to_excel("Нрк_TEST", "tRC_Comp", df)
