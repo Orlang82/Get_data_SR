@@ -4,4 +4,4 @@ SELECT
 FROM SR_BANK.DOCUMENT d
 WHERE
 	d.ACCOUNT_CT LIKE '2652%'
-	AND d.POST_DATE BETWEEN TO_DATE(:date_param, 'dd.mm.yyyy') AND TRUNC(sysdate, 'DAY')
+	AND d.POST_DATE BETWEEN TO_DATE(:date_param, 'dd.mm.yyyy') AND TRUNC(sysdate, 'DD')
