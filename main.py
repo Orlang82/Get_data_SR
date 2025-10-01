@@ -72,4 +72,5 @@ def run_rc_comp():
     paste_to_excel_rc_comp()
 
 def run_plot_as():
+    """Создает и вставляет графики AS ES в Excel."""
     insert_image_to_excel()
