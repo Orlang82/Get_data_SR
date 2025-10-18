@@ -1,0 +1,180 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background-color: #f5f5f5;
+  min-width: 400px;
+  max-width: 500px;
+}
+
+.container {
+  padding: 20px;
+  background: white;
+}
+
+h1 {
+  font-size: 20px;
+  margin-bottom: 20px;
+  color: #333;
+  border-bottom: 2px solid #4CAF50;
+  padding-bottom: 10px;
+}
+
+h2 {
+  font-size: 16px;
+  margin-bottom: 12px;
+  color: #555;
+}
+
+.status-section,
+.config-section,
+.domains-section,
+.actions-section {
+  margin-bottom: 20px;
+  padding: 15px;
+  background: #f9f9f9;
+  border-radius: 8px;
+  border: 1px solid #e0e0e0;
+}
+
+#status-info {
+  font-size: 14px;
+  color: #666;
+}
+
+#active-count {
+  font-weight: bold;
+  color: #4CAF50;
+}
+
+#active-domains {
+  margin-top: 10px;
+  font-size: 13px;
+}
+
+.active-domain {
+  padding: 5px 10px;
+  margin: 5px 0;
+  background: #e8f5e9;
+  border-radius: 4px;
+  display: inline-block;
+}
+
+input[type="text"] {
+  width: 100%;
+  padding: 10px;
+  margin-bottom: 10px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 14px;
+}
+
+input[type="text"]:focus {
+  outline: none;
+  border-color: #4CAF50;
+}
+
+button {
+  padding: 10px 20px;
+  background-color: #4CAF50;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: background-color 0.3s;
+}
+
+button:hover {
+  background-color: #45a049;
+}
+
+button:active {
+  background-color: #3d8b40;
+}
+
+.test-btn {
+  width: 100%;
+  background-color: #2196F3;
+}
+
+.test-btn:hover {
+  background-color: #0b7dda;
+}
+
+#domains-list {
+  margin-bottom: 15px;
+}
+
+.domain-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px;
+  margin-bottom: 8px;
+  background: white;
+  border-radius: 4px;
+  border: 1px solid #ddd;
+}
+
+.domain-name {
+  font-size: 14px;
+  color: #333;
+}
+
+.remove-btn {
+  padding: 5px 12px;
+  background-color: #f44336;
+  font-size: 12px;
+}
+
+.remove-btn:hover {
+  background-color: #da190b;
+}
+
+.add-domain {
+  display: flex;
+  gap: 10px;
+}
+
+.add-domain input {
+  flex: 1;
+  margin-bottom: 0;
+}
+
+.add-domain button {
+  flex-shrink: 0;
+}
+
+.message {
+  margin-top: 15px;
+  padding: 10px;
+  border-radius: 4px;
+  font-size: 13px;
+  display: none;
+}
+
+.message.success {
+  background-color: #d4edda;
+  color: #155724;
+  border: 1px solid #c3e6cb;
+  display: block;
+}
+
+.message.error {
+  background-color: #f8d7da;
+  color: #721c24;
+  border: 1px solid #f5c6cb;
+  display: block;
+}
+
+.empty-list {
+  text-align: center;
+  padding: 20px;
+  color: #999;
+  font-size: 14px;
+}

@@ -1,0 +1,9 @@
+{
+  "name": "com.wiresock.launcher",
+  "description": "Wiresock Auto Launcher Native Host",
+  "path": "C:\\Users\\ORLANG_NOUTE\\OneDrive\\Python\\Get_data_SR\\wiresock-extension\\native-host\\wiresock_host.exe",
+  "type": "stdio",
+  "allowed_origins": [
+    "chrome-extension://cdhomddlednphhfgolepdofbbgnhfcpe/"
+  ]
+}

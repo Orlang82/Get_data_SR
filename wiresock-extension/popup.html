@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Wiresock Auto Launcher</title>
+  <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+  <div class="container">
+    <h1>Wiresock Auto Launcher</h1>
+
+    <div class="status-section">
+      <h2>Статус</h2>
+      <div id="status-info">
+        <p>Активные подключения: <span id="active-count">0</span></p>
+        <div id="active-domains"></div>
+      </div>
+    </div>
+
+    <div class="config-section">
+      <h2>Путь к конфигурации</h2>
+      <input type="text" id="config-path" placeholder="C:\path\to\config.conf">
+      <button id="save-config">Сохранить путь</button>
+    </div>
+
+    <div class="domains-section">
+      <h2>Отслеживаемые домены</h2>
+      <div id="domains-list"></div>
+      <div class="add-domain">
+        <input type="text" id="new-domain" placeholder="example.com">
+        <button id="add-domain">Добавить домен</button>
+      </div>
+    </div>
+
+    <div class="actions-section">
+      <button id="test-connection" class="test-btn">Тестировать подключение</button>
+    </div>
+
+    <div id="message" class="message"></div>
+  </div>
+
+  <script src="popup.js"></script>
+</body>
+</html>
