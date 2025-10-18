@@ -6,7 +6,8 @@
   "permissions": [
     "storage",
     "webNavigation",
-    "nativeMessaging"
+    "nativeMessaging",
+    "notifications"
   ],
   "host_permissions": [
     "<all_urls>"
