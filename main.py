@@ -12,6 +12,7 @@ from fetchers.compens_579 import paste_to_excel_comp_579
 from fetchers.detail_6jx import paste_to_excel_6jx_reserve
 from fetchers.banks_42x import paste_to_excel_banks_42x
 from fetchers.rc_component import paste_to_excel_rc_comp
+from fetchers.detail_a7x import paste_to_excel_a7x_details
 from charts.chart_as_v2 import insert_image_to_excel
 
 # Основные вызовы (вызываются из Excel через xlwings)
@@ -74,3 +75,7 @@ def run_rc_comp():
 def run_plot_as():
     """Создает и вставляет графики AS ES в Excel."""
     insert_image_to_excel()
+
+def run_a7x_details():
+    """Запускает вставку данных из файла DA7X в Excel."""
+    paste_to_excel_a7x_details()
