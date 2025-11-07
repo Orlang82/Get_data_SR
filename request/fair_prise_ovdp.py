@@ -102,18 +102,26 @@ def calculate_term(days):
         return '3M'
     elif days <= 183:
         return '6M'
-    elif days <= 274:
-        return '9M'
     elif days <= 365:
         return '1Y'
     elif days <= 729:
         return '2Y'
+    elif days <= 1094:
+        return '3Y'
+    elif days <= 1459:
+        return '4Y'
     elif days <= 1824:
         return '5Y'
+    elif days <= 2554:
+        return '7Y'
     elif days <= 3649:
         return '10Y'
+    elif days <= 5474:
+        return '15Y'
+    elif days <= 7299:
+        return '20Y'    
     else:
-        return 'UP10Y'
+        return 'UP20Y'
 
 # Применяем функцию к каждой строке столбца days_diff
 # apply() применяет функцию к каждому элементу столбца
