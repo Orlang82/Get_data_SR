@@ -21,7 +21,7 @@ class Config:
     
     # === РАЗМЕЩЕНИЕ В EXCEL ===
     TARGET_SHEET = 'Верифікація моделі ES'   # Куда вставлять диаграмму лист
-    TARGET_CELL = 'D69'                      # Куда вставлять диаграмму
+    TARGET_CELL = 'D52'                      # Куда вставлять диаграмму
     IMAGE_NAME = 'DoubleSpeedometerChart'    # Имя изображения в Excel
     IMAGE_WIDTH = 250                        # Увеличенная ширина изображения в Excel
     IMAGE_HEIGHT = 140                       # Увеличенная высота изображения в Excel
