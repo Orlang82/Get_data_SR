@@ -14,6 +14,8 @@ from fetchers.banks_42x import paste_to_excel_banks_42x
 from fetchers.rc_component import paste_to_excel_rc_comp
 from fetchers.detail_a7x import paste_to_excel_a7x_details
 from charts.chart_as_v2 import insert_image_to_excel
+from charts.chart_es_trade import paste_plot_var_es_trade
+from charts.chart_as_trade import insert_chart_as_trade
 
 # Основные вызовы (вызываются из Excel через xlwings)
 def run_secur_doc():
@@ -79,3 +81,11 @@ def run_plot_as():
 def run_a7x_details():
     """Запускает вставку данных из файла DA7X в Excel."""
     paste_to_excel_a7x_details()
+
+def run_plot_es_trade():
+    """Создает и вставляет графики ES Trade в Excel."""
+    paste_plot_var_es_trade()
+
+def run_plot_as_trade():
+    """Создает и вставляет графики AS Trade в Excel."""
+    insert_chart_as_trade()
