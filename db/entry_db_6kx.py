@@ -86,7 +86,7 @@ def process_single_6kx_file():
             return False
 
         # Шаг 4: Проверка существования базы данных и таблиц
-        db_path = r'r:\Подразделения\РИСК-менеджмент\Внутренние\3 - РИСК ЛИКВИДНОСТИ\1 - БАЛАНС\СКРИПТЫ\PyScripts\DataBase_6KX_6NX\database\liquidity_data.db'
+        db_path = r'r:\Подразделения\РИСК-менеджмент\Внутренние\3 - РИСК ЛИКВИДНОСТИ\DB_LCR\liquidity_data.db'
         
         if not os.path.exists(db_path):
             logger.error("❌ База данных не существует: %s", db_path)

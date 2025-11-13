@@ -16,7 +16,7 @@ DEFAULT_SOURCE_DIR = Path(
     r"r:\Подразделения\РИСК-менеджмент\Внутренние\3 - РИСК ЛИКВИДНОСТИ\DB_LCR\6K"
 )
 DEFAULT_DB_PATH = Path(
-    r"r:\Подразделения\РИСК-менеджмент\Внутренние\3 - РИСК ЛИКВИДНОСТИ\1 - БАЛАНС\СКРИПТЫ\PyScripts\DataBase_6KX_6NX\database\liquidity_data.db"
+    r"r:\Подразделения\РИСК-менеджмент\Внутренние\3 - РИСК ЛИКВИДНОСТИ\DB_LCR\liquidity_data.db"
 )
 EXPECTED_COLUMNS = ["REC_NO", "EKP", "R030", "T100"]
 SOURCE_EXTENSIONS = {".xls", ".xlsx", ".xlsm"}
@@ -304,6 +304,7 @@ def main() -> int:
     failed: List[Path] = []
 
     with sqlite3.connect(db_path) as conn:
+        files_with_dates = []
         for file_path in files:
             try:
                 file_date = extract_report_date(file_path)
@@ -311,7 +312,11 @@ def main() -> int:
                 logger.error("Пропускаю %s: %s", file_path, exc)
                 failed.append(file_path)
                 continue
+            files_with_dates.append((file_date, file_path))
 
+        files_with_dates.sort(key=lambda item: item[0])
+
+        for file_date, file_path in files_with_dates:
             if args.skip_existing and is_date_already_loaded(conn, file_date):
                 logger.info(
                     "Дата %s уже есть в LCR_Combined, пропускаю файл %s",
