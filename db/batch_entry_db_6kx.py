@@ -86,7 +86,7 @@ def extract_report_date(file_path: Path) -> str:
 
 def read_source_dataframe(file_path: Path) -> pd.DataFrame:
     """Считывает Excel-файл, пропуская служебные строки и приводя столбцы к строковому типу. Повторяет набор параметров одиночного скрипта для единообразного поведения."""
-    return pd.read_excel(file_path, skiprows=8, dtype=str)
+    return pd.read_excel(file_path, skiprows=8, dtype=str, engine='calamine')
 
 
 def validate_dataframe(df: pd.DataFrame) -> Optional[str]:

@@ -101,7 +101,7 @@ def process_single_6kx_file():
         # Шаг 5: Чтение данных из файла Excel
         try:
             # Читаем файл, пропуская первые 8 строк (как в оригинальном скрипте)
-            df = pd.read_excel(file_path, skiprows=8, dtype=str)
+            df = pd.read_excel(file_path, skiprows=8, dtype=str, engine='calamine')
             logger.info("✓ Файл прочитан. Строк данных: %s", len(df))
             
         except Exception as e:
