@@ -12,9 +12,9 @@ if sys.platform == 'win32':
 
 # ===== НАЛАШТУВАННЯ =====
 # Вкажіть діапазон дат для скачування
-START_DATE = datetime(2020, 1, 3)  # Початкова дата
-END_DATE = datetime(2025, 11, 3)  # Кінцева дата
-OUTPUT_FOLDER = "ovdp_data"  # Папка для збереження файлів
+START_DATE = datetime(2025, 11, 1)  # Початкова дата
+END_DATE = datetime(2025, 12, 1)  # Кінцева дата
+OUTPUT_FOLDER = r"r:\Подразделения\РИСК-менеджмент\Внутренние\1 - РЫНОЧНЫЙ РИСК\ТОРГОВА КНИГА\0-2025\01-12-2025\ovdp_data"  # Папка для збереження файлів
 
 # ===== КОД СКРИПТУ =====
 def download_ovdp_files(start_date, end_date, output_folder):
