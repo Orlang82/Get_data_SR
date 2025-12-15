@@ -20,7 +20,7 @@ class Config:
     SOURCE_CELL_10D = 'AS_Z2_10d'            # Вторая именованная ячейка (10 дней)
     
     # === РАЗМЕЩЕНИЕ В EXCEL ===
-    TARGET_SHEET = 'Верифікація моделі ES'   # Куда вставлять диаграмму лист
+    TARGET_SHEET = 'ES_торгова_книга'        # Куда вставлять диаграмму лист
     TARGET_CELL = 'D52'                      # Куда вставлять диаграмму
     IMAGE_NAME = 'DoubleSpeedometerChart'    # Имя изображения в Excel
     IMAGE_WIDTH = 250                        # Увеличенная ширина изображения в Excel
