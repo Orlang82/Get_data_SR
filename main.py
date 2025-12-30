@@ -17,6 +17,7 @@ from charts.chart_as_v2 import insert_image_to_excel
 from charts.chart_es_trade import paste_plot_var_es_trade
 from charts.chart_as_trade import insert_chart_as_trade
 from db.entry_db_6kx import process_single_6kx_file
+from fetchers.repo_6jx import paste_to_excel_repo
 
 # Основные вызовы (вызываются из Excel через xlwings)
 def run_secur_doc():
@@ -94,3 +95,7 @@ def run_plot_as_trade():
 def run_single_6kx_file():
     """Обрабатывает один файл 6KX для добавление в БД."""
     process_single_6kx_file()
+
+def run_repo_6jx():
+    """Запускает вставку данных по РЕПО в Excel."""
+    paste_to_excel_repo()
