@@ -40,7 +40,7 @@ class Config:
     
     # Параметры графика
     FIGURE_SIZE = (19.5, 5)           # Размер графика (ширина, высота)
-    X_MIN_LIMIT = -1.5e6           # Минимальная граница по X
+    X_MIN_LIMIT = -1.0e6           # Минимальная граница по X
     BINS_COUNT = 30                # Количество столбцов гистограммы (если используется)
 
 # =============================================================================
@@ -124,7 +124,7 @@ def create_distribution_plot(data, var, es):
 
     # Определение границ графика
     x_min = max(Config.X_MIN_LIMIT, np.min(data))
-    x_max = max(np.max(data), es) * 1.7
+    x_max = max(np.max(data), es) * 1
     x_grid = np.linspace(x_min, x_max, 1000)
 
     # Построение KDE

@@ -18,6 +18,7 @@ from charts.chart_es_trade import paste_plot_var_es_trade
 from charts.chart_as_trade import insert_chart_as_trade
 from db.entry_db_6kx import process_single_6kx_file
 from fetchers.repo_6jx import paste_to_excel_repo
+from fetchers.rc_nma import paste_to_excel_rc_nma
 
 # Основные вызовы (вызываются из Excel через xlwings)
 def run_secur_doc():
@@ -99,3 +100,7 @@ def run_single_6kx_file():
 def run_repo_6jx():
     """Запускает вставку данных по РЕПО в Excel."""
     paste_to_excel_repo()
+
+def run_rc_nma():
+    """Запускает вставку данных по РК НМА в Excel."""
+    paste_to_excel_rc_nma()
