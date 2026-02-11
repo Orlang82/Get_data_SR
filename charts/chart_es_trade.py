@@ -20,12 +20,13 @@ class Config:
     
     # Параметры данных
     DATA_SHEET = 'Scenario_Level_ES'  # Лист с данными о потерях
-    DATA_COLUMN = 'T'                # Колонка с данными о потерях
+    DATA_COLUMN = 'AB'                # Колонка с данными о потерях
     DATA_START_ROW = 7                # Начальная строка данных
     
     # Именованные ячейки для VaR и ES
     VAR_NAMED_CELL = 'Value_VaR'   # Именованная ячейка с VaR
-    ES_NAMED_CELL = 'Expected_Shortfall!C18'     # Именованная ячейка с ES
+    ES_NAMED_CELL = 'Value_ES'     # Именованная ячейка с ES
+    # ES_NAMED_CELL = 'Expected_Shortfall!C11'     # Именованная ячейка с ES
     
     # Параметры вставки изображения
     IMAGE_SHEET = 'ES_торгова_книга'    # Лист для вставки изображения (можете изменить)
@@ -103,7 +104,8 @@ def get_var_es_values():
     """
     wb = xw.Book.caller()
     var = float(wb.names[Config.VAR_NAMED_CELL].refers_to_range.value)
-    es = float(wb.sheets['Expected_Shortfall'].range('C18').value)
+    es = float(wb.names[Config.ES_NAMED_CELL].refers_to_range.value)
+    # es = float(wb.sheets['Expected_Shortfall'].range('C11').value)
     return var, es
 
 # =============================================================================
