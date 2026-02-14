@@ -101,7 +101,7 @@ Two functions in `utils/excel_writer.py`:
    ```python
    from db.oracle import query
    from utils.date_utils import get_previous_working_day, forecast_date
-   from utils.excel_writer import paste_to_excel
+   from utils.excel_writer import paste_to_excel  # or paste_to_excel_smart
    from utils.path_utils import get_sql_path
 
    def fetch_to_<name>():
@@ -112,6 +112,7 @@ Two functions in `utils/excel_writer.py`:
 
    def paste_to_excel_<name>():
        df = fetch_to_<name>()
+       # Use paste_to_excel_smart if tables are vertically stacked
        paste_to_excel("<SheetName>", "<TableName>", df)
    ```
 3. Add to `main.py`:
@@ -122,6 +123,8 @@ Two functions in `utils/excel_writer.py`:
        """Description."""
        paste_to_excel_<name>()
    ```
+
+**Note:** Use `paste_to_excel_smart` instead of `paste_to_excel` when multiple tables are placed vertically on the same sheet to avoid disrupting adjacent tables.
 
 ### Modifying SQL Queries
 
@@ -137,6 +140,68 @@ Chart modules in `charts/` generate matplotlib/plotly visualizations and insert 
 - `chart_es*.py`: Equity structure and VAR analysis charts
 - All use xlwings to insert images/charts into specific Excel ranges
 
+### Advanced Excel Operations
+
+#### Excel COM API Formatting
+
+For advanced Excel formatting (fonts, colors, styles), access Excel COM objects via `.api` property:
+
+```python
+# Access Excel table via COM
+table = sheet.api.ListObjects("TableName")
+start_row = table.HeaderRowRange.Row + 1
+start_col = table.Range.Column
+
+# Format specific row
+row_range = sheet.range((excel_row, start_col)).resize(1, num_columns)
+row_range.api.Font.Color = 0x0000FF  # Red in BGR format
+row_range.api.Font.Bold = True
+row_range.api.Font.Strikethrough = True
+```
+
+**Important notes:**
+- Excel uses **BGR color format**, not RGB: `0xBBGGRR` (e.g., red = `0x0000FF`, gray = `0xA6A6A6`)
+- When iterating over filtered DataFrames to apply formatting, use `enumerate()` to get sequential row numbers:
+  ```python
+  for i, (idx, row) in enumerate(df.iterrows()):
+      excel_row = start_row + i  # Use i, not idx
+  ```
+  The `idx` from `iterrows()` preserves original DataFrame indices, which may not be sequential after filtering.
+
+#### Reading Excel Named Ranges
+
+To read named cells/ranges from Excel:
+```python
+wb = xw.Book.caller()
+value = wb.names['NAMED_CELL'].refers_to_range.value
+```
+
+Common named ranges in this project:
+- `RDATE`: Report date on "menu" sheet
+- `ForecastDate`: Forecast date for forecast mode
+
+### Fetchers with Conditional Logic
+
+Some fetchers (e.g., `detail_6sx.py`) perform multi-step data processing:
+
+1. Execute multiple SQL queries
+2. Apply conditional logic to mark/filter records
+3. Write to multiple Excel tables
+4. Apply conditional formatting
+
+**Critical pattern for conditional logic:**
+- Apply conditions in priority order, checking `mark.isna()` for subsequent conditions
+- Example from `detail_6sx.py`:
+  ```python
+  df['mark'] = None
+  # 1. Highest priority: pre-excluded accounts
+  df.loc[condition1, 'mark'] = 'pre_excluded'
+  # 2. Lower priority: only mark if not already marked
+  df.loc[condition2 & (df['mark'].isna()), 'mark'] = 'exclude'
+  # 3. Lowest priority: only mark if still not marked
+  df.loc[condition3 & (df['mark'].isna()), 'mark'] = 'exclude'
+  ```
+
 ## Common Patterns
 
 ### UDF (User-Defined Function) for Excel
@@ -151,6 +216,20 @@ def py_RoundLR(data, threshold):
 ### Logging
 
 Database entry modules use Python logging to `logs/` directory with UTF-8 encoding for Cyrillic characters.
+
+**Pattern for optional logging:**
+```python
+ENABLE_LOGGING = False  # Toggle at module level
+
+def _setup_logger():
+    if not ENABLE_LOGGING:
+        return logging.getLogger("module_name_disabled")
+    # ... full logger setup
+
+logger = _setup_logger()
+```
+
+This allows easy enable/disable of logging for performance without removing logging code.
 
 ### Error Handling in Excel Operations
 

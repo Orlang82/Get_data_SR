@@ -3,7 +3,6 @@ from fetchers.grp_9000 import paste_to_excel_9000grp
 from fetchers.dz_spot import paste_to_excel_dz_spot
 from fetchers.balance_nrk import paste_to_excel_balance_nrk
 from fetchers.dz_spot_diff import paste_to_excel_diff_spot
-from mail.forecast_nrk import generate_forecast_email
 from fetchers.diff_acc import paste_to_excel_diff_acc
 from fetchers.fz_ccf_6jx import paste_to_excel_fz_ccf_6jx
 from fetchers.doc_acc import paste_to_excel_doc_acc
@@ -19,6 +18,7 @@ from charts.chart_as_trade import insert_chart_as_trade
 from db.entry_db_6kx import process_single_6kx_file
 from fetchers.repo_6jx import paste_to_excel_repo
 from fetchers.rc_nma import paste_to_excel_rc_nma
+from fetchers.detail_6sx import paste_to_excel_detail_6sx
 
 # Основные вызовы (вызываются из Excel через xlwings)
 def run_secur_doc():
@@ -40,10 +40,6 @@ def run_balance_nrk():
 def run_diff_spot():
     """Запускает вставку данных по diff spot в Excel."""
     paste_to_excel_diff_spot()
-
-def run_forecast_mail():
-    """Генерирует и отправляет прогнозное письмо."""
-    generate_forecast_email()
 
 def run_diff_acc():
     """Запускает вставку данных по diff accounts в Excel."""
@@ -104,3 +100,7 @@ def run_repo_6jx():
 def run_rc_nma():
     """Запускает вставку данных по РК НМА в Excel."""
     paste_to_excel_rc_nma()
+
+def run_detail_6sx():
+    """Запускает формирование и контроль перечня счетов для 6S."""
+    paste_to_excel_detail_6sx()
