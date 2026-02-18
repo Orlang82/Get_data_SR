@@ -67,7 +67,7 @@ def fetch_pay_6sx_data():
     # Если счетов нет — возвращаем пустой DataFrame
     if acc_calc.empty:
         logger.info("acc_calc пуст, возвращаем пустой DataFrame")
-        return pd.DataFrame(columns=['R020', 'ACCOUNT_DT', 'CUR', 'ACCOUNT_CT', 'DESCRIPTION', 'SUM_UAH'])
+        return pd.DataFrame(columns=['R020', 'ACCOUNT_DT', 'CUR', 'ACCOUNT_CT', 'DESCRIPTION', 'SUM_UAH', '_ROLE'])
 
     # Читаем SQL-шаблон запроса документов
     sql_path = get_sql_path("SR_6SX_PAY_template.sql")
@@ -84,18 +84,56 @@ def fetch_pay_6sx_data():
         }
         df = query(sql, params)
         if not df.empty:
+            df['_DATA_ACC'] = row['ACCOUNT_NUMBER']
             results.append(df)
         logger.info(f"Счет {row['ACCOUNT_NUMBER']} ({row['CUR']}): найдено документов {len(df)}")
 
     # Объединяем все результаты в один DataFrame
     if results:
         df_all = pd.concat(results, ignore_index=True)
+        # Определяем роль счета в каждой строке: дебет (DT) или кредит (CT)
+        mask_dt = df_all['ACCOUNT_DT'] == df_all['_DATA_ACC']
+        mask_ct = df_all['ACCOUNT_CT'] == df_all['_DATA_ACC']
+        df_all['_ROLE'] = None
+        df_all.loc[mask_dt, '_ROLE'] = 'DT'
+        df_all.loc[mask_ct & df_all['_ROLE'].isna(), '_ROLE'] = 'CT'
+        # Для кредитовых строк меняем знак суммы
+        df_all.loc[mask_ct, 'SUM_UAH'] *= -1
+        df_all = df_all.drop(columns=['_DATA_ACC'])
     else:
-        df_all = pd.DataFrame(columns=['R020', 'ACCOUNT_DT', 'CUR', 'ACCOUNT_CT', 'DESCRIPTION', 'SUM_UAH'])
+        df_all = pd.DataFrame(columns=['R020', 'ACCOUNT_DT', 'CUR', 'ACCOUNT_CT', 'DESCRIPTION', 'SUM_UAH', '_ROLE'])
 
     logger.info(f"Итого документов: {len(df_all)}")
     logger.info("=== Конец fetch_pay_6sx_data ===")
     return df_all
+
+
+def _apply_role_formatting(sheet_name, table_name, roles):
+    """Применяет цвет шрифта к строкам таблицы в зависимости от роли счета.
+
+    DT (дебет, ACCOUNT_DT = data_acc) — зеленый шрифт.
+    CT (кредит, ACCOUNT_CT = data_acc) — красный шрифт.
+    """
+    # Цвета в формате BGR (Excel)
+    COLOR_GREEN = 0x006100   # зеленый
+    COLOR_RED   = 0x0000FF   # красный
+    COLOR_AUTO  = -4105      # xlColorIndexAutomatic
+
+    wb = xw.Book.caller()
+    sheet = wb.sheets[sheet_name]
+    table = sheet.api.ListObjects(table_name)
+    start_row = table.HeaderRowRange.Row + 1
+    start_col = table.Range.Column
+    num_columns = table.ListColumns.Count
+
+    for i, role in enumerate(roles):
+        row_range = sheet.range((start_row + i, start_col)).resize(1, num_columns)
+        if role == 'DT':
+            row_range.api.Font.Color = COLOR_GREEN
+        elif role == 'CT':
+            row_range.api.Font.Color = COLOR_RED
+        else:
+            row_range.api.Font.ColorIndex = COLOR_AUTO
 
 
 def paste_to_excel_pay_6sx(sheet_name="6SX_ACC"):
@@ -109,8 +147,15 @@ def paste_to_excel_pay_6sx(sheet_name="6SX_ACC"):
     logger.info("=== Начало paste_to_excel_pay_6sx ===")
     try:
         df = fetch_pay_6sx_data()
-        paste_to_excel_smart(sheet_name, "t6S_PAY", df)
+        # Отделяем колонку роли до записи в Excel
+        roles = df['_ROLE'].tolist() if '_ROLE' in df.columns else []
+        df_excel = df.drop(columns=['_ROLE'], errors='ignore')
+        paste_to_excel_smart(sheet_name, "t6S_PAY", df_excel)
         logger.info("t6S_PAY записана успешно")
+        # Применяем форматирование шрифта по роли счета
+        if roles:
+            _apply_role_formatting(sheet_name, "t6S_PAY", roles)
+            logger.info("Форматирование шрифта применено")
     except Exception as e:
         logger.error(f"Ошибка в paste_to_excel_pay_6sx: {e}", exc_info=True)
         raise
