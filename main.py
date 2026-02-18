@@ -19,6 +19,7 @@ from db.entry_db_6kx import process_single_6kx_file
 from fetchers.repo_6jx import paste_to_excel_repo
 from fetchers.rc_nma import paste_to_excel_rc_nma
 from fetchers.detail_6sx import paste_to_excel_detail_6sx
+from fetchers.pay_6sx import paste_to_excel_pay_6sx
 
 # Основные вызовы (вызываются из Excel через xlwings)
 def run_secur_doc():
@@ -104,3 +105,7 @@ def run_rc_nma():
 def run_detail_6sx():
     """Запускает формирование и контроль перечня счетов для 6S."""
     paste_to_excel_detail_6sx()
+
+def run_pay_6sx():
+    """Запускает формирование перечня документов, формирующих остатки для 6S."""
+    paste_to_excel_pay_6sx()

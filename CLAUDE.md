@@ -2,6 +2,31 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
+## Setup
+
+### Database Credentials
+
+Oracle connection reads credentials from `~\.conda\db_ac.json`. Create this file before running any data fetcher:
+
+```json
+{
+  "user": "your_username",
+  "password": "your_password",
+  "dsn": "host:port/service_name"
+}
+```
+
+Connection uses `oracledb` in Thin Mode (no Oracle Client required).
+
+### Running Scripts
+
+All fetchers require an active Excel workbook as caller. Scripts **cannot run standalone** — they must be invoked from Excel via:
+```vba
+RunPython "import main; main.run_<module_name>()"
+```
+
+To test a fetcher in isolation, open the target `.xlsm` workbook in Excel and trigger the macro from there.
+
 ## Project Overview
 
 This is a Python-based liquidity risk management system that integrates with Excel via xlwings. The project fetches data from an Oracle database (SR_BANK schema), processes it, and inserts it into Excel tables for analysis. It also includes charting capabilities for visualizing asset/equity structure (AS/ES) data.
@@ -124,14 +149,26 @@ Two functions in `utils/excel_writer.py`:
        paste_to_excel_<name>()
    ```
 
-**Note:** Use `paste_to_excel_smart` instead of `paste_to_excel` when multiple tables are placed vertically on the same sheet to avoid disrupting adjacent tables.
+**Note:** Use `paste_to_excel_smart` instead of `paste_to_excel` when multiple tables are placed vertically on the same sheet to avoid disrupting adjacent tables. Unlike `paste_to_excel`, `paste_to_excel_smart` does **not** disable `screen_updating` or `calculation` during execution.
 
 ### Modifying SQL Queries
 
 - All SQL templates are in `sql/` directory with `.sql` extension
 - Use Oracle SQL syntax with named parameters (`:param_name`)
 - Common parameters: `:date_param` (format: 'DD.MM.YYYY')
-- Query the SR_BANK schema tables (ACCOUNT, ACCOUNT_SNAPSHOT, etc.)
+- Query the SR_BANK schema tables (ACCOUNT, ACCOUNT_SNAPSHOT, DOCUMENT, CURRENCY, etc.)
+- Some queries accept per-row parameters (e.g., `:data_acc`, `:data_cur`) that are passed in a loop from Python when iterating over a DataFrame
+
+### Reading Report Date Directly vs. Forecast Date
+
+Most fetchers use `forecast_date() or get_previous_working_day()`. However, fetchers that need a specific **report date** (not forecast) read `RDATE` from the Excel named range directly:
+
+```python
+wb = xw.Book.caller()
+rdate = wb.names['RDATE'].refers_to_range.value  # Returns datetime or string
+```
+
+Use this pattern when the operation is tied to a specific reporting date regardless of forecast mode (e.g., `detail_6sx.py`).
 
 ### Working with Charts
 
@@ -202,6 +239,23 @@ Some fetchers (e.g., `detail_6sx.py`) perform multi-step data processing:
   df.loc[condition3 & (df['mark'].isna()), 'mark'] = 'exclude'
   ```
 
+### Fetchers That Depend on Other Fetchers
+
+Some fetchers reuse data prepared by another fetcher rather than querying Oracle directly. Example: `pay_6sx.py` calls `fetch_6sx_data()` from `detail_6sx` to obtain the filtered account list, then runs per-row SQL queries against that list.
+
+```python
+from fetchers.detail_6sx import fetch_6sx_data
+
+def fetch_pay_6sx_data():
+    acc_calc, _ = fetch_6sx_data()   # переиспользуем результат другого фетчера
+    for _, row in acc_calc.iterrows():
+        df = query(sql, {"data_acc": row['ACCOUNT_NUMBER'], ...})
+        results.append(df)
+    return pd.concat(results, ignore_index=True)
+```
+
+This pattern is used when the output of one SQL pipeline feeds into a second query as a parameter list. The dependency means calling `run_pay_6sx()` implicitly re-runs the account-fetching queries from `detail_6sx`.
+
 ## Common Patterns
 
 ### UDF (User-Defined Function) for Excel
@@ -243,3 +297,9 @@ finally:
     app.calculation = 'automatic'
     app.screen_updating = True
 ```
+
+## Conventions
+
+- Code comments are written in **Russian**
+- All file I/O uses `encoding="utf-8"` (required for Cyrillic in SQL files and logs)
+- In-progress development tasks are tracked in `TASKS.md` at the project root
