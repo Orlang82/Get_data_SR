@@ -69,6 +69,7 @@ def paste_to_excel_balance_nrk():
   - `excel_writer.py`: Two strategies for writing DataFrames to Excel tables
   - `date_utils.py`: Working day calculations and forecast date handling
   - `path_utils.py`: Path resolution for SQL templates
+  - `parser_forex.py`: Text parser for extracting forex deal numbers from DESCRIPTION fields (numbers starting with `c`/`с` or `9`; normalizes Cyrillic/Ukrainian `с` to ASCII `c`)
 - **`charts/`**: Chart generation modules (AS/ES analysis, trading charts)
 - **`request/`**: External data requests (e.g., fair price OVDP from web sources)
 
@@ -89,7 +90,7 @@ The system supports two modes:
 - **Normal mode**: Uses previous working day (`get_previous_working_day()`)
 - **Forecast mode**: Uses date from Excel named range `ForecastDate` if set
 
-Most fetchers check `forecast_date()` first, falling back to previous working day if None.
+Most fetchers check `forecast_date()` first, falling back to previous working day if None. `forecast_date()` returns a raw Excel `datetime` object (not a formatted string) or `None` if the cell is empty.
 
 ### Excel Table Writing Strategies
 
@@ -98,11 +99,13 @@ Two functions in `utils/excel_writer.py`:
 1. **`paste_to_excel()`**: Default strategy
    - Clears table, resizes, and inserts new data
    - Turns off screen updating and calculations during operation
+   - Replaces `NaN` with empty strings (`fillna('')`) before writing
    - Preferred for most use cases
 
 2. **`paste_to_excel_smart()`**: For vertically stacked tables
    - Adds/removes rows individually to avoid disrupting adjacent tables
    - Use when multiple Excel tables are placed one under another
+   - Does **not** replace `NaN` — passes raw `df.values.tolist()`, so `None` may appear in Excel cells if DataFrame contains nulls
 
 ### Database Workflows
 
@@ -158,6 +161,20 @@ Two functions in `utils/excel_writer.py`:
 - Common parameters: `:date_param` (format: 'DD.MM.YYYY')
 - Query the SR_BANK schema tables (ACCOUNT, ACCOUNT_SNAPSHOT, DOCUMENT, CURRENCY, etc.)
 - Some queries accept per-row parameters (e.g., `:data_acc`, `:data_cur`) that are passed in a loop from Python when iterating over a DataFrame
+
+#### Dynamic IN-clause for Multi-value Queries
+
+`oracledb` does not support binding a Python list to a single `:param` in an `IN (...)` clause. Build the placeholders dynamically and replace before executing:
+
+```python
+numbers = ["c11132", "c11133", "954521482"]
+placeholders = ", ".join(f":v{i}" for i in range(len(numbers)))
+sql = sql.replace(":data_number", placeholders)   # :data_number in template
+params = {f"v{i}": v for i, v in enumerate(numbers)}
+df = query(sql, params)
+```
+
+Use a single placeholder name (e.g., `:data_number`) in the SQL template to mark where the list should be injected.
 
 ### Reading Report Date Directly vs. Forecast Date
 
@@ -254,7 +271,13 @@ def fetch_pay_6sx_data():
     return pd.concat(results, ignore_index=True)
 ```
 
-This pattern is used when the output of one SQL pipeline feeds into a second query as a parameter list. The dependency means calling `run_pay_6sx()` implicitly re-runs the account-fetching queries from `detail_6sx`.
+This pattern is used when the output of one SQL pipeline feeds into a second query as a parameter list. Dependencies can be multi-level:
+
+```
+detail_6sx → pay_6sx → forex_6sx
+```
+
+Calling `run_forex_6sx()` implicitly re-runs both `detail_6sx` and `pay_6sx` queries.
 
 ## Common Patterns
 
