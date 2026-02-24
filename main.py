@@ -21,6 +21,7 @@ from fetchers.rc_nma import paste_to_excel_rc_nma
 from fetchers.detail_6sx import paste_to_excel_detail_6sx
 from fetchers.pay_6sx import paste_to_excel_pay_6sx
 from fetchers.forex_6sx import paste_to_excel_forex_6sx
+from fetchers.interest_7sx import paste_to_excel_interest_7sx
 
 # Основные вызовы (вызываются из Excel через xlwings)
 def run_secur_doc():
@@ -114,3 +115,7 @@ def run_pay_6sx():
 def run_forex_6sx():
     """Запускает формирование перечня forex-сделок по документам 6S."""
     paste_to_excel_forex_6sx()
+
+def run_interest_7sx():
+    """Запускает расчёт процентного риска торговой книги 7S."""
+    paste_to_excel_interest_7sx()

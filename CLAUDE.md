@@ -27,6 +27,8 @@ RunPython "import main; main.run_<module_name>()"
 
 To test a fetcher in isolation, open the target `.xlsm` workbook in Excel and trigger the macro from there.
 
+Exception: scripts in `request/` are standalone and run directly with Python (no Excel required).
+
 ## Project Overview
 
 This is a Python-based liquidity risk management system that integrates with Excel via xlwings. The project fetches data from an Oracle database (SR_BANK schema), processes it, and inserts it into Excel tables for analysis. It also includes charting capabilities for visualizing asset/equity structure (AS/ES) data.
@@ -46,7 +48,7 @@ Example:
 # fetchers/balance_nrk.py
 def fetch_to_balance_nrk():
     sql_path = get_sql_path("SR_BALANCE_NRK_template.sql")
-    sql = open(sql_path).read().strip().rstrip(";")
+    sql = open(sql_path, encoding="utf-8").read().strip().rstrip(";")
     date_param = forecast_date() or get_previous_working_day()
     return query(sql, {"date_param": date_param})
 
@@ -71,7 +73,7 @@ def paste_to_excel_balance_nrk():
   - `path_utils.py`: Path resolution for SQL templates
   - `parser_forex.py`: Text parser for extracting forex deal numbers from DESCRIPTION fields (numbers starting with `c`/`с` or `9`; normalizes Cyrillic/Ukrainian `с` to ASCII `c`)
 - **`charts/`**: Chart generation modules (AS/ES analysis, trading charts)
-- **`request/`**: External data requests (e.g., fair price OVDP from web sources)
+- **`request/`**: Standalone scripts for downloading external data (e.g., fair price OVDP from NBU website); run directly with Python, no Excel required
 
 ### Excel Integration via xlwings
 
@@ -97,7 +99,7 @@ Most fetchers check `forecast_date()` first, falling back to previous working da
 Two functions in `utils/excel_writer.py`:
 
 1. **`paste_to_excel()`**: Default strategy
-   - Clears table, resizes, and inserts new data
+   - Clears table body (guards against empty table: `DataBodyRange` is `None` when table has no rows), resizes, and inserts new data
    - Turns off screen updating and calculations during operation
    - Replaces `NaN` with empty strings (`fillna('')`) before writing
    - Preferred for most use cases
@@ -106,6 +108,7 @@ Two functions in `utils/excel_writer.py`:
    - Adds/removes rows individually to avoid disrupting adjacent tables
    - Use when multiple Excel tables are placed one under another
    - Does **not** replace `NaN` — passes raw `df.values.tolist()`, so `None` may appear in Excel cells if DataFrame contains nulls
+   - Does **not** disable `screen_updating` or `calculation`
 
 ### Database Workflows
 
@@ -152,8 +155,6 @@ Two functions in `utils/excel_writer.py`:
        paste_to_excel_<name>()
    ```
 
-**Note:** Use `paste_to_excel_smart` instead of `paste_to_excel` when multiple tables are placed vertically on the same sheet to avoid disrupting adjacent tables. Unlike `paste_to_excel`, `paste_to_excel_smart` does **not** disable `screen_updating` or `calculation` during execution.
-
 ### Modifying SQL Queries
 
 - All SQL templates are in `sql/` directory with `.sql` extension
@@ -176,16 +177,36 @@ df = query(sql, params)
 
 Use a single placeholder name (e.g., `:data_number`) in the SQL template to mark where the list should be injected.
 
-### Reading Report Date Directly vs. Forecast Date
+### Reading Parameters from Excel
 
-Most fetchers use `forecast_date() or get_previous_working_day()`. However, fetchers that need a specific **report date** (not forecast) read `RDATE` from the Excel named range directly:
+#### Named Ranges
 
 ```python
 wb = xw.Book.caller()
-rdate = wb.names['RDATE'].refers_to_range.value  # Returns datetime or string
+value = wb.names['NAMED_CELL'].refers_to_range.value  # Returns datetime or string
 ```
 
-Use this pattern when the operation is tied to a specific reporting date regardless of forecast mode (e.g., `detail_6sx.py`).
+Common named ranges in this project:
+- `RDATE`: Report date on "menu" sheet (used by `detail_6sx.py` and similar)
+- `RDATE7SX`: Report date on "Calculation" sheet (used by `interest_7sx.py`)
+- `ForecastDate`: Forecast date for forecast mode
+
+Use named ranges when the operation is tied to a specific reporting date regardless of forecast mode.
+
+#### Parameter Table (`tParam`)
+
+Some fetchers read file paths or settings from a parameter table on the `sys` sheet:
+
+```python
+wb = xw.Book.caller()
+sheet = wb.sheets['sys']
+table = sheet.api.ListObjects("tParam")
+df = sheet.range(table.Range.Address).options(pd.DataFrame, header=1, index=False).value
+path_row = df[df['Параметр'] == 'Path_DA7X']
+path = path_row.iloc[0]['Значение']
+```
+
+Use this pattern when parameters are maintained by users in an Excel table rather than a named cell.
 
 ### Working with Charts
 
@@ -201,12 +222,10 @@ Chart modules in `charts/` generate matplotlib/plotly visualizations and insert 
 For advanced Excel formatting (fonts, colors, styles), access Excel COM objects via `.api` property:
 
 ```python
-# Access Excel table via COM
 table = sheet.api.ListObjects("TableName")
 start_row = table.HeaderRowRange.Row + 1
 start_col = table.Range.Column
 
-# Format specific row
 row_range = sheet.range((excel_row, start_col)).resize(1, num_columns)
 row_range.api.Font.Color = 0x0000FF  # Red in BGR format
 row_range.api.Font.Bold = True
@@ -221,18 +240,6 @@ row_range.api.Font.Strikethrough = True
       excel_row = start_row + i  # Use i, not idx
   ```
   The `idx` from `iterrows()` preserves original DataFrame indices, which may not be sequential after filtering.
-
-#### Reading Excel Named Ranges
-
-To read named cells/ranges from Excel:
-```python
-wb = xw.Book.caller()
-value = wb.names['NAMED_CELL'].refers_to_range.value
-```
-
-Common named ranges in this project:
-- `RDATE`: Report date on "menu" sheet
-- `ForecastDate`: Forecast date for forecast mode
 
 ### Fetchers with Conditional Logic
 
@@ -271,7 +278,7 @@ def fetch_pay_6sx_data():
     return pd.concat(results, ignore_index=True)
 ```
 
-This pattern is used when the output of one SQL pipeline feeds into a second query as a parameter list. Dependencies can be multi-level:
+Dependencies can be multi-level:
 
 ```
 detail_6sx → pay_6sx → forex_6sx
@@ -292,21 +299,31 @@ def py_RoundLR(data, threshold):
 
 ### Logging
 
-Database entry modules use Python logging to `logs/` directory with UTF-8 encoding for Cyrillic characters.
+Fetcher modules use Python logging to `logs/` directory with UTF-8 encoding for Cyrillic characters. Always resolve the log path relative to `__file__` (not a relative string) and guard against duplicate handlers on module reload:
 
-**Pattern for optional logging:**
 ```python
+import os
+import logging
+
 ENABLE_LOGGING = False  # Toggle at module level
 
 def _setup_logger():
     if not ENABLE_LOGGING:
         return logging.getLogger("module_name_disabled")
-    # ... full logger setup
+    logger = logging.getLogger("module_name")
+    if logger.handlers:          # guard against duplicate handlers on reload
+        return logger
+    logger.setLevel(logging.INFO)
+    script_dir = os.path.dirname(os.path.abspath(__file__))
+    log_dir = os.path.abspath(os.path.join(script_dir, '..', 'logs'))
+    os.makedirs(log_dir, exist_ok=True)
+    handler = logging.FileHandler(os.path.join(log_dir, 'module_name.log'), encoding='utf-8')
+    handler.setFormatter(logging.Formatter('%(asctime)s - %(levelname)s - %(message)s'))
+    logger.addHandler(handler)
+    return logger
 
 logger = _setup_logger()
 ```
-
-This allows easy enable/disable of logging for performance without removing logging code.
 
 ### Error Handling in Excel Operations
 
