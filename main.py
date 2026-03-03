@@ -22,6 +22,7 @@ from fetchers.detail_6sx import paste_to_excel_detail_6sx
 from fetchers.pay_6sx import paste_to_excel_pay_6sx
 from fetchers.forex_6sx import paste_to_excel_forex_6sx
 from fetchers.interest_7sx import paste_to_excel_interest_7sx
+from charts.chart_7s import create_market_risk_chart
 
 # Основные вызовы (вызываются из Excel через xlwings)
 def run_secur_doc():
@@ -119,3 +120,7 @@ def run_forex_6sx():
 def run_interest_7sx():
     """Запускает расчёт процентного риска торговой книги 7S."""
     paste_to_excel_interest_7sx()
+
+def run_chart_7s():
+    """Создать и вставить график динамики минимального размера рыночного риска."""
+    create_market_risk_chart()
