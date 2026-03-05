@@ -95,7 +95,7 @@ class Config:
     # Параметры размещения готового PNG-файла в рабочей книге
     
     IMAGE_SHEET  = "To_Report"         # Лист Excel для вставки графика
-    IMAGE_CELL   = "C17"               # Ячейка-якорь для позиционирования
+    IMAGE_CELL   = "C18"               # Ячейка-якорь для позиционирования
     IMAGE_NAME   = "Chart_MarketRisk_7S" # Имя объекта Picture в Excel (для удаления/замены)
     TEMP_IMAGE   = "market_risk_7s.png"  # Имя временного PNG-файла в домашней директории
     IMAGE_WIDTH  = 720                   # Ширина изображения в Excel (пиксели)
@@ -107,7 +107,7 @@ class Config:
     # ==========================================================================
     # Общие параметры холста и фона
     
-    FIGURE_SIZE = (8.0, 4.0)  # Размер фигуры (дюймы): (ширина, высота)
+    FIGURE_SIZE = (8.0, 3.5)  # Размер фигуры (дюймы): (ширина, высота)
     BG_COLOR    = "#FFFFFF"   # Цвет фона фигуры (hex)
 
     # ==========================================================================
@@ -125,11 +125,11 @@ class Config:
     # Параметры отображения трёх линий: Валютний, Процентний, Товарний ризик
     
     LINE_VAL_COLOR   = "#00B050"   # Цвет линии валютного риска (зелёный)
-    LINE_PCT_COLOR   = "#FC2600"   # Цвет линии процентного риска (жёлтый)
+    LINE_PCT_COLOR   = "#F85639"   # Цвет линии процентного риска (жёлтый)
     LINE_TOVAR_COLOR = "#ED7D31"   # Цвет линии товарного риска (оранжевый)
     LINE_WIDTH       = 2.0         # Толщина всех линий (пункты)
     MARKER_SIZE      = 4           # Размер маркеров на точках данных
-    
+
     # Стили маркеров для каждой линии ('o' = круг, 's' = квадрат, '^' = треугольник вверх)
     MARKER_STYLE_VAL   = "o"       # Маркер валютного риска
     MARKER_STYLE_PCT   = "o"       # Маркер процентного риска
@@ -153,7 +153,6 @@ class Config:
     LABEL_FONTWEIGHT_MRRR = "bold"    # Насыщенность шрифта для подписей МРРР
     
     # Цвета подписей (подбираются для контраста с фоном линии/столбца)
-    LABEL_COLOR_BAR   = "#FFFFFF"     # Подписи внутри столбцов МРРР (белый)
     LABEL_COLOR_LINES = "#1F3864"     # Подписи линий по умолчанию (тёмно-синий)
     LABEL_COLOR_VAL   = "#FFFFFF"     # Подписи на зелёной линии (белый)
     LABEL_COLOR_PCT   = "#FFFFFF"     # Подписи на жёлтой линии (тёмно-синий)
@@ -162,7 +161,7 @@ class Config:
     # Отступы подписей от базовой точки (доля от y_max основной оси)
     LABEL_OFFSET_Y     = 0.04  # Отступ для подписей МРРР
     LABEL_OFFSET_VAL   = 0.02   # Отступ для подписей валютного риска
-    LABEL_OFFSET_PCT   = -0.14   # Отступ для подписей процентного риска
+    LABEL_OFFSET_PCT   = -0.10   # Отступ для подписей процентного риска 
     LABEL_OFFSET_TOVAR = 0.02   # Отступ для подписей товарного риска
 
     # Положение подписей относительно точки данных
@@ -177,9 +176,10 @@ class Config:
     # Параметры заголовка графика
     
     TITLE_TEXT       = "Динаміка мінімального розміру ринкового ризику"
-    TITLE_FONTSIZE   = 10          # Размер шрифта заголовка (пункты)
+    TITLE_FONTSIZE   = 12          # Размер шрифта заголовка (пункты)
     TITLE_FONTWEIGHT = "bold"      # Насыщенность шрифта заголовка
     TITLE_COLOR      = "#1F3864"   # Цвет текста заголовка
+    TITLE_PAD        = 7          # Отступ заголовка от диаграммы (пункты)
 
     # ==========================================================================
     # ОСЬ X
@@ -191,6 +191,7 @@ class Config:
     XAXIS_FONTWEIGHT  = "bold"      # Насыщенность шрифта подписей дат
     XAXIS_FONTSTYLE   = "normal"    # Начертание шрифта подписей дат
     XAXIS_COLOR       = "#1F3864"   # Цвет оси и подписей (тёмно-синий)
+    XAXIS_LABEL_PAD   = 6           # Отступ подписей дат от оси X (пункты)
 
     # ==========================================================================
     # ОСИ Y
@@ -349,10 +350,11 @@ def _compute_bar_heights(mrrr: np.ndarray, use_break: bool, y_cap: float):
     сохраняя взаимные соотношения (столбец 28 > столбца 20 на графике).
     Если False — все превышающие столбцы обрезаются точно по y_cap.
 
-    Возвращает (bar_heights, break_tops) — массивы одинаковой формы.
+    Возвращает (bar_heights, break_tops, k_proportional) — высоты столбцов и
+    коэффициент сжатия (или None, если не используется пропорциональный режим).
     """
     if not use_break:
-        return mrrr.copy(), mrrr.copy()
+        return mrrr.copy(), mrrr.copy(), None
 
     if Config.BREAK_PROPORTIONAL:
         y_max_render = y_cap * 1.3                              # предел для самого высокого
@@ -364,9 +366,9 @@ def _compute_bar_heights(mrrr: np.ndarray, use_break: bool, y_cap: float):
     else:
         bar_heights = np.where(mrrr > y_cap, y_cap, mrrr)
         break_tops  = np.full_like(mrrr, y_cap)
+        k = None
 
-    return bar_heights, break_tops
-
+    return bar_heights, break_tops, k
 
 
 def _draw_line_with_labels(ax, x, values, line_kw: dict, label_kw: dict,
@@ -434,7 +436,7 @@ def build_chart(df: pd.DataFrame):
     use_break   = bool(np.any(mrrr > cfg.MRRR_BREAK_MULTIPLIER * median_mrrr))
     y_cap       = median_mrrr * cfg.MRRR_CAP_MULTIPLIER if use_break else None
 
-    bar_heights, break_tops = _compute_bar_heights(mrrr, use_break, y_cap)
+    bar_heights, break_tops, k_proportional = _compute_bar_heights(mrrr, use_break, y_cap)
 
     # --- Инициализация фигуры ---
     fig, ax = plt.subplots(figsize=cfg.FIGURE_SIZE)
@@ -445,9 +447,17 @@ def build_chart(df: pd.DataFrame):
     # --- Масштаб основной оси Y ---
     # В режиме разрыва линии тоже ограничиваем y_cap, чтобы выброс не сжимал график
     def _safe_max(arr):
-        """Максимум массива без NaN; при разрыве — ограничен y_cap."""
+        """Максимум массива без NaN; при разрыве — ограничен сжатыми значениями."""
         clean = np.where(np.isnan(arr), 0, arr)
-        return float(np.max(np.minimum(clean, y_cap) if use_break else clean))
+        if use_break and k_proportional is not None:
+            # Пропорциональное сжатие
+            compressed = np.where(clean > y_cap, y_cap + (clean - y_cap) * k_proportional, clean)
+            return float(np.max(compressed))
+        elif use_break:
+            # Простая обрезка
+            return float(np.max(np.minimum(clean, y_cap)))
+        else:
+            return float(np.max(clean))
 
     y_main_max = max(
         float(np.max(bar_heights)),
@@ -490,12 +500,17 @@ def build_chart(df: pd.DataFrame):
         fontstyle=cfg.LABEL_FONTSTYLE,
     )
 
-    # Валютний ризик: в режиме разрыва тоже ограничиваем линию порогом y_cap,
-    # чтобы крупные значения не выходили за видимую область
-    val_draw = (
-        np.where(np.isnan(val_risk), np.nan, np.minimum(val_risk, y_cap))
-        if use_break else val_risk
-    )
+    # Валютний ризик: в режиме разрыва тоже применяем пропорциональное сжатие
+    if use_break and k_proportional is not None:
+        val_draw = np.where(
+            np.isnan(val_risk),
+            np.nan,
+            np.where(val_risk > y_cap, y_cap + (val_risk - y_cap) * k_proportional, val_risk)
+        )
+    elif use_break:
+        val_draw = np.where(np.isnan(val_risk), np.nan, np.minimum(val_risk, y_cap))
+    else:
+        val_draw = val_risk
     _draw_line_with_labels(
         ax, x, val_draw,
         line_kw=dict(
@@ -516,10 +531,19 @@ def build_chart(df: pd.DataFrame):
     # В режиме разрыва линия оказывается ВНУТРИ обрезанного столбца (bar до y_cap*1.3),
     # поэтому подписи выводим ВЫШЕ верхушки столбца (y_label_base=break_heights),
     # а не под обрезанной линией, где тёмный текст сливался бы с тёмным баром.
-    pct_draw = (
-        np.where(np.isnan(pct_risk), np.nan, np.minimum(pct_risk, y_cap))
-        if use_break else pct_risk
-    )
+    if use_break and k_proportional is not None:
+        # Пропорциональное сжатие для сохранения соотношений между значениями
+        pct_draw = np.where(
+            np.isnan(pct_risk), 
+            np.nan, 
+            np.where(pct_risk > y_cap, y_cap + (pct_risk - y_cap) * k_proportional, pct_risk)
+        )
+    elif use_break:
+        # Простая обрезка по y_cap
+        pct_draw = np.where(np.isnan(pct_risk), np.nan, np.minimum(pct_risk, y_cap))
+    else:
+        pct_draw = pct_risk
+    
     _draw_line_with_labels(
         ax, x, pct_draw,
         line_kw=dict(
@@ -573,7 +597,7 @@ def build_chart(df: pd.DataFrame):
         fontstyle=cfg.XAXIS_FONTSTYLE,
         color=cfg.XAXIS_COLOR,
     )
-    ax.tick_params(axis="x", which="both", length=0)
+    ax.tick_params(axis="x", which="both", length=0, pad=cfg.XAXIS_LABEL_PAD)
 
     # --- 6. Заголовок ---
     ax.set_title(
@@ -581,7 +605,8 @@ def build_chart(df: pd.DataFrame):
         fontsize=cfg.TITLE_FONTSIZE,
         fontweight=cfg.TITLE_FONTWEIGHT,
         color=cfg.TITLE_COLOR,
-        pad=12,
+        pad=cfg.TITLE_PAD,
+        loc="left",
     )
 
     # --- 7. Легенда (объединяем обе оси) ---

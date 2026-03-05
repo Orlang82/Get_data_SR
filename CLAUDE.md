@@ -210,10 +210,40 @@ Use this pattern when parameters are maintained by users in an Excel table rathe
 
 ### Working with Charts
 
-Chart modules in `charts/` generate matplotlib/plotly visualizations and insert them into Excel:
-- `chart_as*.py`: Asset structure analysis charts
-- `chart_es*.py`: Equity structure and VAR analysis charts
-- All use xlwings to insert images/charts into specific Excel ranges
+All chart modules in `charts/` follow a consistent five-part structure:
+
+1. **`Config` class** — all visual and data parameters in one place (colors, sizes, sheet/cell targets, thresholds). No magic numbers in logic functions — always reference `cfg.SOMETHING`.
+2. **`get_chart_data()`** — reads source data from an Excel table/named range via xlwings.
+3. **`build_chart(df)`** — constructs and returns a `matplotlib` figure.
+4. **`save_chart(fig)`** — saves the figure to a temp PNG in the user's home directory (`~`).
+5. **`insert_chart_to_excel(img_path)`** — removes the old Picture object by `IMAGE_NAME`, inserts the new PNG anchored at `IMAGE_CELL`.
+
+Public entry point registered in `main.py`:
+```python
+def create_<name>_chart():
+    df  = get_chart_data()
+    fig = build_chart(df)
+    img_path = save_chart(fig)
+    insert_chart_to_excel(img_path)
+```
+
+Key `Config` conventions:
+- `IMAGE_NAME` — unique name for the Excel Picture object; used to delete/replace on re-run.
+- `TEMP_IMAGE` — filename in `~`; overwritten on every run.
+- Colors in hex (`"#1F3864"`), sizes in points or inches, positional offsets as fractions of the axis range.
+
+#### Adding a New Chart Module
+
+1. Create `charts/<name>.py` with a `Config` class and the four helper functions above.
+2. Add the public `create_<name>_chart()` entry point.
+3. Register in `main.py`:
+   ```python
+   from charts.<name> import create_<name>_chart
+
+   def run_<name>():
+       """Description."""
+       create_<name>_chart()
+   ```
 
 ### Advanced Excel Operations
 
@@ -325,6 +355,17 @@ def _setup_logger():
 logger = _setup_logger()
 ```
 
+### Module-Level Business Constants in Fetchers
+
+Some fetchers define domain tables at module level that analysts may need to update. Example from `interest_7sx.py`:
+
+```python
+TENOR_BOUNDS = [(31, "1M"), (92, "3M"), ...]   # (day_limit, label) pairs
+TENOR_COEF   = {"1M": 0, "3M": 0.0020, ...}    # label → regulatory coefficient
+```
+
+Use this pattern when a fetcher encodes regulatory or business rules as lookup tables — keeps them visible and easy to update without touching logic.
+
 ### Error Handling in Excel Operations
 
 Always wrap xlwings operations in try-finally blocks to restore Excel settings:
@@ -338,8 +379,10 @@ finally:
     app.screen_updating = True
 ```
 
+**Note:** `paste_to_excel()` in `utils/excel_writer.py` does **not** use try-finally internally. If an exception occurs mid-operation, `screen_updating` and `calculation` are not restored automatically. The caller is responsible for wrapping `paste_to_excel()` in try-finally when this matters.
+
 ## Conventions
 
 - Code comments are written in **Russian**
 - All file I/O uses `encoding="utf-8"` (required for Cyrillic in SQL files and logs)
-- In-progress development tasks are tracked in `TASKS.md` at the project root
+- In-progress development tasks are tracked in `TASKS*.md` files at the project root (e.g., `TASKS_chart_7s_new.md`)
