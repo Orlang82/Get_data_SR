@@ -22,7 +22,7 @@ from fetchers.detail_6sx import paste_to_excel_detail_6sx
 from fetchers.pay_6sx import paste_to_excel_pay_6sx
 from fetchers.forex_6sx import paste_to_excel_forex_6sx
 from fetchers.interest_7sx import paste_to_excel_interest_7sx
-from charts.chart_7s import create_market_risk_chart
+from charts.chart_7s_mrrr import create_market_risk_chart
 
 # Основные вызовы (вызываются из Excel через xlwings)
 def run_secur_doc():
