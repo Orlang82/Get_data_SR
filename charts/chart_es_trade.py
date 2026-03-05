@@ -41,8 +41,10 @@ class Config:
     
     # Параметры графика
     FIGURE_SIZE = (19.5, 5)           # Размер графика (ширина, высота)
-    X_MIN_LIMIT = -3.8e6           # Минимальная граница по X
+    X_MIN_LIMIT = -2.5e6           # Минимальная граница по X -3.8e6
+    X_MAX_LIMIT = None             # Максимальная граница по X (None = авто)
     BINS_COUNT = 30                # Количество столбцов гистограммы (если используется)
+    KDE_BANDWIDTH = 1.9            # Множитель сглаживания KDE (1.0 = авто по правилу Скотта, >1 = глаже)
 
 # =============================================================================
 # ФУНКЦИИ РАБОТЫ С ДАННЫМИ
@@ -125,12 +127,13 @@ def create_distribution_plot(data, var, es):
     plt.figure(figsize=Config.FIGURE_SIZE)
 
     # Определение границ графика
-    x_min = max(Config.X_MIN_LIMIT, np.min(data))
-    x_max = max(np.max(data), es) * 1.7
+    x_min = Config.X_MIN_LIMIT if Config.X_MIN_LIMIT is not None else np.min(data)
+    x_max = Config.X_MAX_LIMIT if Config.X_MAX_LIMIT is not None else max(np.max(data), es) * 1.7
     x_grid = np.linspace(x_min, x_max, 1000)
 
     # Построение KDE
     kde = gaussian_kde(data)
+    kde.set_bandwidth(kde.factor * Config.KDE_BANDWIDTH)
     y_kde = kde(x_grid)
 
     # Индекс для VaR
