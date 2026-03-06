@@ -20,12 +20,12 @@ class Config:
     
     # Параметры данных
     DATA_SHEET = 'Scenario_Level_ES'  # Лист с данными о потерях
-    DATA_COLUMN = 'AB'                # Колонка с данными о потерях
+    DATA_COLUMN = 'M'                # Колонка с данными о потерях
     DATA_START_ROW = 7                # Начальная строка данных
     
     # Именованные ячейки для VaR и ES
-    VAR_NAMED_CELL = 'Value_VaR'   # Именованная ячейка с VaR
-    ES_NAMED_CELL = 'Value_ES'     # Именованная ячейка с ES
+    VAR_NAMED_CELL = 'Value_VaR_1'   # Именованная ячейка с VaR
+    ES_NAMED_CELL = 'Value_ES_1'     # Именованная ячейка с ES
     # ES_NAMED_CELL = 'Expected_Shortfall!C11'     # Именованная ячейка с ES
     
     # Параметры вставки изображения
@@ -41,8 +41,8 @@ class Config:
     
     # Параметры графика
     FIGURE_SIZE = (19.5, 5)           # Размер графика (ширина, высота)
-    X_MIN_LIMIT = -2.5e6           # Минимальная граница по X -3.8e6
-    X_MAX_LIMIT = None             # Максимальная граница по X (None = авто)
+    X_MIN_LIMIT = -1.8e6           # Минимальная граница по X -3.8e6
+    X_MAX_LIMIT = 1.8e6             # Максимальная граница по X (None = авто)
     BINS_COUNT = 30                # Количество столбцов гистограммы (если используется)
     KDE_BANDWIDTH = 1.9            # Множитель сглаживания KDE (1.0 = авто по правилу Скотта, >1 = глаже)
 
