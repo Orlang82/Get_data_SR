@@ -1,3 +1,10 @@
+"""
+Публичный API для вызова из Excel-макросов через xlwings.
+
+Каждая функция run_*() вызывается из VBA:
+    RunPython "import main; main.run_<name>()"
+"""
+
 # ── Баланс / регуляторные отчёты ──────────────────────────────────────────────
 from fetchers.secur_doc import paste_to_excel_secur_doc
 from fetchers.grp_9000 import paste_to_excel_9000grp
