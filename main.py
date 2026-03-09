@@ -5,7 +5,7 @@
     RunPython "import main; main.run_<name>()"
 """
 
-# ── Баланс / регуляторные отчёты ──────────────────────────────────────────────
+# == Баланс / регуляторные отчёты =============================================
 from fetchers.secur_doc import paste_to_excel_secur_doc
 from fetchers.grp_9000 import paste_to_excel_9000grp
 from fetchers.balance_nrk import paste_to_excel_balance_nrk
@@ -13,7 +13,7 @@ from fetchers.diff_acc import paste_to_excel_diff_acc
 from fetchers.doc_acc import paste_to_excel_doc_acc
 from fetchers.compens_579 import paste_to_excel_comp_579
 
-# ── Позиции и сделки (6JX / 42X) ──────────────────────────────────────────────
+# == Позиции и сделки (6JX / 42X) =============================================
 from fetchers.dz_spot import paste_to_excel_dz_spot
 from fetchers.dz_spot_diff import paste_to_excel_diff_spot
 from fetchers.fz_ccf_6jx import paste_to_excel_fz_ccf_6jx
@@ -21,31 +21,32 @@ from fetchers.detail_6jx import paste_to_excel_6jx_reserve
 from fetchers.repo_6jx import paste_to_excel_repo
 from fetchers.banks_42x import paste_to_excel_banks_42x
 
-# ── Регуляторный капитал ───────────────────────────────────────────────────────
+# == Регуляторный капитал =====================================================
 from fetchers.rc_component import paste_to_excel_rc_comp
 from fetchers.rc_nma import paste_to_excel_rc_nma
 
-# ── Детализация счетов (6SX / 7SX / A7X) ─────────────────────────────────────
+# == Детализация счетов (6SX / 7SX / A7X) =====================================
 from fetchers.detail_a7x import paste_to_excel_a7x_details
 from fetchers.detail_6sx import paste_to_excel_detail_6sx
 from fetchers.pay_6sx import paste_to_excel_pay_6sx
 from fetchers.forex_6sx import paste_to_excel_forex_6sx
 from fetchers.interest_7sx import paste_to_excel_interest_7sx
 
-# ── Графики ────────────────────────────────────────────────────────────────────
+# == Графики ==================================================================
 from charts.chart_es import paste_plot_var_es
 from charts.chart_as_v2 import insert_image_to_excel
 from charts.chart_es_trade import paste_plot_var_es_trade
 from charts.chart_as_trade import insert_chart_as_trade
 from charts.chart_7s_mrrr import create_market_risk_chart
 
-# ── База данных ────────────────────────────────────────────────────────────────
+# == База данных ==============================================================
 from db.entry_db_6kx import process_single_6kx_file
 
-
+# =============================================================================
 # Основные вызовы (вызываются из Excel через xlwings)
+# =============================================================================
 
-# ── Баланс / регуляторные отчёты ──────────────────────────────────────────────
+# == Баланс / регуляторные отчёты =============================================
 
 def run_secur_doc():
     """Запускает вставку данных по security documents в Excel."""
@@ -72,7 +73,7 @@ def run_compens_579():
     paste_to_excel_comp_579()
 
 
-# ── Позиции и сделки (6JX / 42X) ──────────────────────────────────────────────
+# == Позиции и сделки (6JX / 42X) =============================================
 
 def run_dz_spot():
     """Запускает вставку данных по dz spot в Excel."""
@@ -99,7 +100,7 @@ def run_42x_banks():
     paste_to_excel_banks_42x()
 
 
-# ── Регуляторный капитал ───────────────────────────────────────────────────────
+# == Регуляторный капитал =====================================================
 
 def run_rc_comp():
     """Запускает вставку данных для компонентов РК в Excel."""
@@ -110,7 +111,7 @@ def run_rc_nma():
     paste_to_excel_rc_nma()
 
 
-# ── Детализация счетов (6SX / 7SX / A7X) ─────────────────────────────────────
+# == Детализация счетов (6SX / 7SX / A7X) =====================================
 
 def run_a7x_details():
     """Запускает вставку данных из файла DA7X в Excel."""
@@ -133,7 +134,7 @@ def run_interest_7sx():
     paste_to_excel_interest_7sx()
 
 
-# ── Графики ────────────────────────────────────────────────────────────────────
+# == Графики ==================================================================
 
 def run_plot_var_es():
     """Создает и вставляет график VAR ES в Excel."""
@@ -156,7 +157,7 @@ def run_chart_7s():
     create_market_risk_chart()
 
 
-# ── База данных ────────────────────────────────────────────────────────────────
+# == База данных ==============================================================
 
 def run_single_6kx_file():
     """Обрабатывает один файл 6KX для добавление в БД."""
