@@ -1,11 +1,11 @@
 import os
 import logging
 import pandas as pd
-import xlwings as xw
 
 from db.oracle import query
 from utils.excel_writer import paste_to_excel
 from utils.path_utils import get_sql_path
+from utils.date_utils import get_previous_working_day
 
 # --- Логирование (отключить при необходимости установив False) ---
 ENABLE_LOGGING = True
@@ -73,10 +73,9 @@ def _tenor_label(days):
 
 def fetch_interest_7sx():
     """Получает данные процентного риска торговой книги 7S."""
-    # Читаем отчётную дату из именованной ячейки RDATE7SX листа Calculation
-    wb = xw.Book.caller()
-    rdate = wb.names['RDATE7SX'].refers_to_range.value
-    logger.info(f"Отчётная дата RDATE7SX: {rdate}")
+    # Определяем дату как предыдущий рабочий день от сегодня
+    rdate = get_previous_working_day()
+    logger.info(f"Отчётная дата: {rdate}")
 
     # Загружаем SQL-шаблон
     sql_path = get_sql_path("SR_7S_INTEREST_RISK_template.sql")
